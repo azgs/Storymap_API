@@ -1,0 +1,11 @@
+everything functionality-wise is done for postgresql
+
+I have the text searching down, it looks like you need %San Pedro% to cover
+things that will contain that, otherwise "San Pedro" will only match that
+exactly (no leading, trailing chars)
+
+
+otherwise, have DB connections working, will be able to build strings
+make sure to use the psycopg docs to sanitize strings
+
+later can consider switching to some kind of ORM or such 
