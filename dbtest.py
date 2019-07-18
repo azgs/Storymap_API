@@ -2,15 +2,16 @@
 
 # test connection to DB
 import psycopg2
-import psycopg2.sql as sql
+# import psycopg2.sql as sql
 
 # Connect to database and establish cursor
-connection = psycopg2.connect("dbname=storymap user=postgres")
-cursor = connection.cursor()
 
 
 
 def printall():
+    connection = psycopg2.connect("dbname=storymap user=steve")
+    cursor = connection.cursor()
+
     # Query the database 
     cursor.execute("SELECT * FROM api_tables.storymap_metadata")
     # a = cursor.fetchall()
@@ -28,11 +29,12 @@ def printall():
 # have to have the % to match surrounding things
 
 def printonename():
+
+    connection = psycopg2.connect("dbname=storymap user=steve")
+    cursor = connection.cursor()
+
     # Query the database 
-    name = '\'San Pedro\''
-    name = 'San Pedro'
-    name = '%GEO%'
-    name = '%ArIZonA%'
+    name = '%SAN%'
     cursor.execute('SELECT * FROM api_tables.storymap_metadata WHERE name ILIKE %s',  (name, ))
     # cursor.execute("SELECT * FROM api_tables.storymap_metadata WHERE name ILIKE '%San Pedro%'")
     # cursor.execute("SELECT * FROM api_tables.storymap_metadata WHERE name ILIKE %s", name)
@@ -50,9 +52,9 @@ def printonename():
     a = 34
     while (a):
         a = cursor.fetchone()
-        print(" \n")
+        print("\n")
         print(a)
-        print(" \n")
+        print("\n")
 
     # Close communication with the database
     cursor.close()
