@@ -6,15 +6,12 @@ import psycopg2
 
 # Connect to database and establish cursor
 
-
-
 def printall():
     connection = psycopg2.connect("dbname=storymap user=steve")
     cursor = connection.cursor()
 
     # Query the database 
-    cursor.execute("SELECT * FROM api_tables.storymap_metadata")
-    # a = cursor.fetchall()
+    returns = cursor.execute("SELECT * FROM api_tables.storymap_metadata")
     a = 34
     while (a):
         a = cursor.fetchone()
@@ -34,8 +31,8 @@ def printonename():
     cursor = connection.cursor()
 
     # Query the database 
-    name = '%SAN%'
-    cursor.execute('SELECT * FROM api_tables.storymap_metadata WHERE name ILIKE %s',  (name, ))
+    name = '%%'
+    cursor.execute('SELECT * FROM api_tables.storymap_metadata WHERE name ILIKE %s and TRUE',  (name, ))
     # cursor.execute("SELECT * FROM api_tables.storymap_metadata WHERE name ILIKE '%San Pedro%'")
     # cursor.execute("SELECT * FROM api_tables.storymap_metadata WHERE name ILIKE %s", name)
 
@@ -60,5 +57,5 @@ def printonename():
     cursor.close()
     connection.close()
 
-# printall()
+#printall()
 printonename()
