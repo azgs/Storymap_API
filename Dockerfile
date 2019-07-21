@@ -1,38 +1,50 @@
-FROM ubuntu:18.04
+# Stage 1 - up-to-date ubuntu base #############################################
+FROM ubuntu:18.04 AS base-environment
 
+# avoid hangs on packages like tzdata
+ARG DEBIAN_FRONTEND=noninteractive
 
-# Set the working directory to /map_api
-WORKDIR /map_api
+RUN apt update && \
+    apt -y upgrade && \
+    apt -y dist-upgrade && \
+    apt -y autoclean && \
+    apt -y autoremove
 
-# Copy the current directory contents into the container at /app
-COPY . /map_api
-
-# Install any needed packages specified in requirements.txt
-# RUN pip install --trusted-host pypi.python.org -r requirements.txt
+# Stage 2 - package installation ###############################################
+FROM base-environment AS packages-installed
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN \
-    apt update && \
-    apt -y install python3 python3-pip postgresql postgis
+RUN apt -y install python3 python3-pip postgresql postgis libpq-dev locales
 
-RUN \
-    service postgresql restart
+# fix locales for postgres
+RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+    locale-gen
 
-# RUN \
-#     apt update && \
-#     apt -y upgrade && \
-#     apt -y dist-upgrade && \
-#     apt -y autoclean && \
-#     apt -y autoremove && \
-#     apt -y install python3 python3-pip
+ENV LANG en_US.UTF-8  
+ENV LANGUAGE en_US:en  
+ENV LC_ALL en_US.UTF-8 
 
-# Make port 80 available to the world outside this container
-#EXPOSE 80
+# Stage 3 python environment setup #############################################
+FROM packages-installed AS python-environment
 
-# Define environment variable
-# ENV NAME World
+COPY . /map_api
 
-# Run app.py when the container launches
-# CMD ["python", "app.py"]
-CMD ["echo", "built."]
+WORKDIR /map_api
+
+RUN pip3 install -r requirements.txt
+
+# Stage 4 set up database ######################################################
+FROM python-environment AS database-setup
+
+USER postgres
+
+WORKDIR /map_api
+
+RUN service postgresql restart && psql < /map_api/data/storymap.sql
+
+# Stage 5 closing config #######################################################
+FROM database-setup AS final-setup
+EXPOSE 5000
+
+CMD ["./bootstrap.sh"]
