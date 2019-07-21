@@ -36,7 +36,7 @@ def home():
 def storymap_lookup():
 
     # DB connection
-    connection = psycopg2.connect("dbname=storymap user=steve")
+    connection = psycopg2.connect("dbname=storymap user=postgres")
     cursor = connection.cursor()
 
     # Fetch API call parameters
@@ -100,5 +100,5 @@ app.config['DEBUG'] = True      # for testing ONLY
 
 # TODO - has to be app.run() on deploy
 # Start the application
-app.run()                       # listen on localhost
-# app.run(host='0.0.0.0')       # listen on the local IP - for testing ONLY
+# app.run()                       # listen on localhost only
+app.run(host='0.0.0.0')       # listen on the local IP - for testing ONLY
