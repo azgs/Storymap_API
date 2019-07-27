@@ -9,3 +9,18 @@ otherwise, have DB connections working, will be able to build strings
 make sure to use the psycopg docs to sanitize strings
 
 later can consider switching to some kind of ORM or such 
+
+*** TODO Second iteration
+- routes for "storymap_metadata" are done
+- Adding routes for the other table - "storymap_features"
+- 3 new routes or query types
+- routes for: *feature_id* *map_id*, and *geom*
+- notes about geom: the user will need to pass in a geometry, likely as a minimum
+  bounding box. then THAT can be used to query against the geometries in the
+  database
+- andrew suggested using ST_MAKEENVELOPE and ST_INTERSECTS. the second returns a
+  bool, the first sounds like it creates a bounding box. The idea is to return
+  all records that would be contained by the bounding box. It sounds like these
+  are PostGIS functions, and should have their own documentation
+- he also mentioned a ST_AS_GEOJSON function that might be able to generate JSON
+  for us easily
