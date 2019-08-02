@@ -8,6 +8,7 @@ Stephen Nolan
 Arizona Geological Survey
 '''
 
+import decimal
 import flask
 from flask import request, jsonify
 import json
@@ -28,12 +29,16 @@ def home():
     <p>/api/v1/metadata?creator=Arizona</p>
     <p>/api/v1/metadata?creator=Arizona&name=San%20Pedro</p>
     <p>/api/v1/metadata?creator=Arizona&name=kaibab&map_id=3</p>
+    <p></p>
+    <p>/api/v1/features?all</p>
+    <p>/api/v1/features?map_id=2</p>
+    <p>/api/v1/features?feature_id=3</p>
     '''
 
 
-# Route for lookups
+# Route for metadata lookups
 @app.route('/api/v1/metadata', methods=['GET'])
-def storymap_lookup():
+def metadata_lookup():
 
     # DB connection
     connection = psycopg2.connect("dbname=storymap user=postgres")
@@ -52,7 +57,7 @@ def storymap_lookup():
     # Request for all entries
     if all_requested:
 
-        query = "SELECT * FROM api_tables.storymap_metadata"
+        query = "SELECT * FROM api_tables.storymap_metadata ORDER BY map_id ASC"
 
     # Request for filtered entries
     if not all_requested:
@@ -75,7 +80,7 @@ def storymap_lookup():
         # this idea trims trailing 'AND'
         # query = query[:-4] + ';'
         # my idea - NOOP cap instead of string slicing
-        query = query + ' TRUE;'
+        query = query + ' TRUE ORDER BY map_id ASC;'
 
     # Print final query string to console
     print(query)
@@ -89,6 +94,72 @@ def storymap_lookup():
     connection.close()
 
     # Return results
+    return jsonify(results)
+
+
+# Route for features lookups
+@app.route('/api/v1/features', methods=['GET'])
+def features_lookup():
+
+    # DB connection
+    connection = psycopg2.connect("dbname=storymap user=postgres")
+    cursor = connection.cursor()
+
+    # Fetch API call parameters
+    query_parameters = request.args
+
+    # Specific lookup parameters, special case for "all"
+    all_requested = query_parameters.get('all')
+    feature_id = query_parameters.get('feature_id')
+    map_id = query_parameters.get('map_id')
+    # TODO this is just a stub, will likely need 2+ params for the "geom" query
+    geom = query_parameters.get('geom')
+
+    # Request for all entries
+    if all_requested:
+
+        # query = "SELECT * FROM api_tables.storymap_features ORDER BY feature_id ASC;"
+        # Casting needed to convert the PostgreSQL numeric type of x and y, to
+        # something JSON compatible, here a double precision floating literal
+        query = "SELECT feature_id, map_id, feature_name, feature_picture, feature, CAST (x AS DOUBLE PRECISION), CAST (y AS DOUBLE PRECISION), wkid, geom FROM api_tables.storymap_features ORDER BY feature_id ASC;"
+
+    # Request for filtered entries
+    if not all_requested:
+
+        # TODO safety/sanitization
+        # Build query string
+        #query = "SELECT * FROM api_tables.storymap_features WHERE"
+        query = "SELECT feature_id, map_id, feature_name, feature_picture, feature, CAST (x AS DOUBLE PRECISION), CAST (y AS DOUBLE PRECISION), wkid, geom FROM api_tables.storymap_features WHERE"
+
+        if feature_id:
+            query += ' feature_id={} AND'.format(feature_id)
+        if map_id:
+            query += ' map_id={} AND'.format(map_id)
+#        if name:
+#            query += ' name ILIKE \'%{}%\' AND'.format(name)
+#        if creator:
+#            query += ' creator ILIKE \'%{}%\' AND'.format(creator)
+#        if map_link:
+#            query += ' map_link=\'{}\' AND'.format(map_link)
+
+        # close the statement with a NOOP
+        # TODO verify best practice for this
+        # this idea trims trailing 'AND'
+        # query = query[:-4] + ';'
+        # my idea - NOOP cap instead of string slicing
+        query = query + ' TRUE ORDER BY feature_id ASC;'
+
+    # Print final query string to console
+    print('\n' + query + '\n')
+
+    # Retrieve all results
+    cursor.execute(query)
+    results = cursor.fetchall()
+
+    # Close DB connection
+    cursor.close()
+    connection.close()
+
     return jsonify(results)
 
 
