@@ -35,3 +35,20 @@ should just be the two closing portions of building queries, after the closing
 "AND TRUE", OR just replace the and true.... might need to keep it to not break
 calls, but you will just add the order by clause, to ensure behavior of what is
 returned
+
+
+current remaining:
+1) http://www.postgresonline.com/journal/archives/267-Creating-GeoJSON-Feature-Collections-with-JSON-and-PostGIS-functions.html
+some good ideas here about building out the GeoJSON....it looks like the best
+way to do it will be manually where you explicitly do selects and assign things
+names, and one by one tie the columns to label names etc
+
+both routes will need to output valid geojson, which you can test with a
+validator
+
+2) second remaining piece is the geometric path...
+ should be 4 values, min and max for y and x, to build the box, then find out
+ what features would be inside that box
+
+3) wrapping it up final in docker so it's clean and runs automatically on the
+exposed port, everything nice and clean fo rthe build process
