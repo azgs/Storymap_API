@@ -11,8 +11,9 @@ def printall():
     cursor = connection.cursor()
 
     # Query the database 
-    returns = cursor.execute("SELECT * FROM api_tables.storymap_metadata")
-    a = 34
+    # returns = cursor.execute("SELECT * FROM api_tables.storymap_metadata ORDER BY map_id ASC;")
+    returns = cursor.execute("SELECT * FROM api_tables.storymap_features CAST (x AS DOUBLE PRECISION)ORDER BY feature_id ASC;")
+    a = True
     while (a):
         a = cursor.fetchone()
         print(a)
@@ -25,14 +26,16 @@ def printall():
 
 # have to have the % to match surrounding things
 
-def printonename():
+def printone():
 
     connection = psycopg2.connect("dbname=storymap user=steve")
     cursor = connection.cursor()
 
     # Query the database 
     name = '%%'
-    cursor.execute('SELECT * FROM api_tables.storymap_metadata WHERE name ILIKE %s and TRUE',  (name, ))
+    # cursor.execute('SELECT * FROM api_tables.storymap_features WHERE feature_id=3 and TRUE')
+    cursor.execute('SELECT feature_id, map_id, feature_name, feature_picture, feature, CAST (x AS DOUBLE PRECISION), CAST (y AS DOUBLE PRECISION), wkid, geom FROM api_tables.storymap_features WHERE feature_id=3 and TRUE')
+    # cursor.execute('SELECT * FROM api_tables.storymap_features WHERE name ILIKE %s and TRUE',  (name, ))
     # cursor.execute("SELECT * FROM api_tables.storymap_metadata WHERE name ILIKE '%San Pedro%'")
     # cursor.execute("SELECT * FROM api_tables.storymap_metadata WHERE name ILIKE %s", name)
 
@@ -58,4 +61,4 @@ def printonename():
     connection.close()
 
 #printall()
-printonename()
+printone()
