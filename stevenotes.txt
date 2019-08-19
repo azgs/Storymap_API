@@ -43,8 +43,8 @@ some good ideas here about building out the GeoJSON....it looks like the best
 way to do it will be manually where you explicitly do selects and assign things
 names, and one by one tie the columns to label names etc
 
-both routes will need to output valid geojson, which you can test with a
-validator
+the metadata path will not return GeoJSON, just JSON
+the features path will need to return GeoJSON
 
 2) second remaining piece is the geometric path...
  should be 4 values, min and max for y and x, to build the box, then find out
