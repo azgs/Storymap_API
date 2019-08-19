@@ -8,6 +8,7 @@ Stephen Nolan
 Arizona Geological Survey
 '''
 
+import collections
 import decimal
 import flask
 from flask import request, jsonify
@@ -93,8 +94,32 @@ def metadata_lookup():
     cursor.close()
     connection.close()
 
+    # variable <results> should now reference a list of tuples; the tuples
+    # containing all of the values from the columns for each record returned
+
+    # TODO might be able to build these labels into the returned results via the
+    # cursor calls. For now just manually build out the appropriate keys for the
+    # JSON template
+
+    labelled_results = []
+
+    for record in results:
+
+        keyed_record = collections.OrderedDict()
+        
+        keyed_record['map_id'] = record[0]
+        keyed_record['name'] = record[1]
+        keyed_record['description'] = record[2]
+        keyed_record['creator'] = record[3]
+        keyed_record['enterer'] = record[4]
+        keyed_record['map_link'] = record[5]
+        keyed_record['app_id'] = record[6]
+        keyed_record['webmap_id'] = record[7]
+
+        labelled_results.append(keyed_record)
+
     # Return results
-    return jsonify(results)
+    return(jsonify({'success': labelled_results}))
 
 
 # Route for features lookups
@@ -164,6 +189,9 @@ def features_lookup():
 
 
 ####### Run configuration ######################################################
+
+# Prevent JSON responses from being sorted on alphabetical order of keys
+app.config['JSON_SORT_KEYS'] = False
 
 # TODO - has to be FALSE on deploy
 app.config['DEBUG'] = True      # for testing ONLY
