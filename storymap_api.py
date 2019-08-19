@@ -106,7 +106,7 @@ def metadata_lookup():
     for record in results:
 
         keyed_record = collections.OrderedDict()
-        
+
         keyed_record['map_id'] = record[0]
         keyed_record['name'] = record[1]
         keyed_record['description'] = record[2]
@@ -185,7 +185,33 @@ def features_lookup():
     cursor.close()
     connection.close()
 
-    return jsonify(results)
+    # variable <results> should now reference a list of tuples; the tuples
+    # containing all of the values from the columns for each record returned
+
+    # TODO might be able to build these labels into the returned results via the
+    # cursor calls. For now just manually build out the appropriate keys for the
+    # JSON template
+
+    labelled_results = []
+
+    for record in results:
+
+        keyed_record = collections.OrderedDict()
+
+        keyed_record['feature_id'] = record[0]
+        keyed_record['map_id'] = record[1]
+        keyed_record['feature_name'] = record[2]
+        keyed_record['feature_picture'] = record[3]
+        keyed_record['feature'] = record[4]
+        keyed_record['x'] = record[5]
+        keyed_record['y'] = record[6]
+        keyed_record['wkid'] = record[7]
+        keyed_record['geom'] = record[8]
+
+        labelled_results.append(keyed_record)
+
+    # Return results
+    return(jsonify({'success': labelled_results}))
 
 
 ####### Run configuration ######################################################
