@@ -58,3 +58,13 @@ super helpful update from andrew... the st_asgeojson(geom) call is what
 generates the whole type:point Coordinates: .... stuff. Can probably just strip
 that out of the big complicated call later on and make all of this so much
 cleaner
+
+
+
+
+
+TODO friday meeting
+* what type of error reporting would they like? edge cases?
+
+* does DB need to support writes? uploading information
+POST, currently we only handle GETS

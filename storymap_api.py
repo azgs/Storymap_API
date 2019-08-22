@@ -185,7 +185,7 @@ def features_lookup():
     cursor.execute(query)
     # results = cursor.fetchall()
     # features = { "type": "FeatureCollection", "features": [{"type": "feature", "geometry": f[3], "properties": {"id": int(f[0]), "area": float(f[1]), "perimeter": float(f[2])}} for f in cursor.fetchall()]} 
-    features = { "type": "FeatureCollection", "features": [{"type": "Feature", "geometry": f[5], "properties": {"feature_id": f[0], "map_id": f[1], "feature_name": f[2], "feature_picture": f[2], "feature": f[4]}} for f in cursor.fetchall()]} 
+    features = { "type": "FeatureCollection", "features": [{"type": "Feature", "geometry": f[5], "properties": {"feature_id": f[0], "map_id": f[1], "feature_name": f[2], "feature_picture": f[3], "feature": f[4]}} for f in cursor.fetchall()]} 
     # Close DB connection
     cursor.close()
     connection.close()
