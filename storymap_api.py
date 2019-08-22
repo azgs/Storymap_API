@@ -5,6 +5,8 @@ StoryMap API
 2019
 Andrew Zaffos
 Stephen Nolan
+Laura Bookman
+Haley Snellen
 Arizona Geological Survey
 '''
 
@@ -137,8 +139,12 @@ def features_lookup():
     all_requested = query_parameters.get('all')
     feature_id = query_parameters.get('feature_id')
     map_id = query_parameters.get('map_id')
-    # TODO this is just a stub, will likely need 2+ params for the "geom" query
-    geom = query_parameters.get('geom')
+    min_x = query_parameters.get('min_x')
+    max_x = query_parameters.get('max_x')
+    min_y = query_parameters.get('min_y')
+    max_y = query_parameters.get('max_y')
+    # TODO currently assuming SRID will always be 4326
+    srid = query_parameters.get('srid', default=4326)
 
     # Request for all entries
     if all_requested:
@@ -154,18 +160,16 @@ def features_lookup():
         # TODO safety/sanitization
         # Build query string
         #query = "SELECT * FROM api_tables.storymap_features WHERE"
-        query = "SELECT feature_id, map_id, feature_name, feature_picture, feature, CAST (x AS DOUBLE PRECISION), CAST (y AS DOUBLE PRECISION), wkid, geom FROM api_tables.storymap_features WHERE"
+        #query = "SELECT feature_id, map_id, feature_name, feature_picture, feature, CAST (x AS DOUBLE PRECISION), CAST (y AS DOUBLE PRECISION), wkid, geom FROM api_tables.storymap_features WHERE"
+        query = "SELECT feature_id, map_id, feature_name, feature_picture, feature,  ST_AsGeoJSON(geom)::jsonb FROM api_tables.storymap_features WHERE"
 
         if feature_id:
             query += ' feature_id={} AND'.format(feature_id)
         if map_id:
             query += ' map_id={} AND'.format(map_id)
-#        if name:
-#            query += ' name ILIKE \'%{}%\' AND'.format(name)
-#        if creator:
-#            query += ' creator ILIKE \'%{}%\' AND'.format(creator)
-#        if map_link:
-#            query += ' map_link=\'{}\' AND'.format(map_link)
+        if min_x and max_x and min_y and max_y:
+            query += ' ST_Intersects (geom, ST_MakeEnvelope({}, \
+                    {}, {}, {}, {})) AND'.format(min_x, min_y, max_x, max_y, srid)
 
         # close the statement with a NOOP
         # TODO verify best practice for this
@@ -179,8 +183,9 @@ def features_lookup():
 
     # Retrieve all results
     cursor.execute(query)
-    results = cursor.fetchall()
-
+    # results = cursor.fetchall()
+    # features = { "type": "FeatureCollection", "features": [{"type": "feature", "geometry": f[3], "properties": {"id": int(f[0]), "area": float(f[1]), "perimeter": float(f[2])}} for f in cursor.fetchall()]} 
+    features = { "type": "FeatureCollection", "features": [{"type": "Feature", "geometry": f[5], "properties": {"feature_id": f[0], "map_id": f[1], "feature_name": f[2], "feature_picture": f[2], "feature": f[4]}} for f in cursor.fetchall()]} 
     # Close DB connection
     cursor.close()
     connection.close()
@@ -192,26 +197,27 @@ def features_lookup():
     # cursor calls. For now just manually build out the appropriate keys for the
     # JSON template
 
-    labelled_results = []
-
-    for record in results:
-
-        keyed_record = collections.OrderedDict()
-
-        keyed_record['feature_id'] = record[0]
-        keyed_record['map_id'] = record[1]
-        keyed_record['feature_name'] = record[2]
-        keyed_record['feature_picture'] = record[3]
-        keyed_record['feature'] = record[4]
-        keyed_record['x'] = record[5]
-        keyed_record['y'] = record[6]
-        keyed_record['wkid'] = record[7]
-        keyed_record['geom'] = record[8]
-
-        labelled_results.append(keyed_record)
+#    labelled_results = []
+#
+#    for record in results:
+#
+#        keyed_record = collections.OrderedDict()
+#
+#        keyed_record['feature_id'] = record[0]
+#        keyed_record['map_id'] = record[1]
+#        keyed_record['feature_name'] = record[2]
+#        keyed_record['feature_picture'] = record[3]
+#        keyed_record['feature'] = record[4]
+#        keyed_record['x'] = record[5]
+#        keyed_record['y'] = record[6]
+#        keyed_record['wkid'] = record[7]
+#        keyed_record['geom'] = record[8]
+#
+#        labelled_results.append(keyed_record)
 
     # Return results
-    return(jsonify({'success': labelled_results}))
+    # return(jsonify({'success': labelled_results}))
+    return(features)
 
 
 ####### Run configuration ######################################################

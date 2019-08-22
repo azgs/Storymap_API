@@ -52,3 +52,9 @@ the features path will need to return GeoJSON
 
 3) wrapping it up final in docker so it's clean and runs automatically on the
 exposed port, everything nice and clean fo rthe build process
+
+
+super helpful update from andrew... the st_asgeojson(geom) call is what
+generates the whole type:point Coordinates: .... stuff. Can probably just strip
+that out of the big complicated call later on and make all of this so much
+cleaner
