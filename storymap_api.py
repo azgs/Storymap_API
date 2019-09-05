@@ -143,6 +143,7 @@ def features_lookup():
     max_x = query_parameters.get('max_x')
     min_y = query_parameters.get('min_y')
     max_y = query_parameters.get('max_y')
+    wkt = query_parameters.get('wkt')
     # TODO currently assuming SRID will always be 4326
     srid = query_parameters.get('srid', default=4326)
 
@@ -170,6 +171,8 @@ def features_lookup():
         if min_x and max_x and min_y and max_y:
             query += ' ST_Intersects (geom, ST_MakeEnvelope({}, \
                     {}, {}, {}, {})) AND'.format(min_x, min_y, max_x, max_y, srid)
+        if wkt:
+            query += ' ST_Intersects (geom, ST_GeomFromText(\'{}\', {})) AND'.format(wkt, srid)
 
         # close the statement with a NOOP
         # TODO verify best practice for this
