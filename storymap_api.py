@@ -253,7 +253,10 @@ app.config['JSON_SORT_KEYS'] = False
 #app.config['DEBUG'] = True      # for testing ONLY
 app.config['DEBUG'] = False
 
-# TODO - has to be app.run() on deploy
-# Start the application
-app.run()                       # listen on localhost only
-# app.run(host='0.0.0.0')       # listen on the local IP - for testing ONLY
+
+if __name__ == "__main__":
+    # TODO - has to be app.run() on deploy
+
+    # Start the application
+    app.run()                       # listen on localhost only
+    # app.run(host='0.0.0.0')       # listen on the local IP - for testing ONLY
