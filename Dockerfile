@@ -1,3 +1,7 @@
+# Dockerfile for 
+# Storymap_API application
+# 2019 Arizona Geological Survey
+
 # Stage 1 - up-to-date ubuntu base #############################################
 FROM ubuntu:18.04 AS base-environment
 
@@ -30,7 +34,7 @@ FROM packages-installed AS python-environment
 
 # Pip installs done here *before* adding the rest of the files, so that docker
 # cache can better be utilized, and the pip installs don't have to run every
-# time any one source file has been modified
+# time any one source file in the project has been modified
 COPY ./requirements.txt /map_api/requirements.txt
 RUN pip3 install -r /map_api/requirements.txt
 
