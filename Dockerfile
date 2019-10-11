@@ -28,11 +28,16 @@ ENV LC_ALL en_US.UTF-8
 # Stage 3 python environment setup #############################################
 FROM packages-installed AS python-environment
 
+# Pip installs done here *before* adding the rest of the files, so that docker
+# cache can better be utilized, and the pip installs don't have to run every
+# time any one source file has been modified
+COPY ./requirements.txt /map_api/requirements.txt
+RUN pip3 install -r requirements.txt
+
 COPY . /map_api
 
 WORKDIR /map_api
 
-RUN pip3 install -r requirements.txt
 
 # Stage 4 set up database ######################################################
 FROM python-environment AS database-setup
