@@ -1,4 +1,4 @@
 #!/bin/bash
 
 service postgresql restart
-python3 storymap_api.py
+gunicorn -b localhost:5000 -w 4 storymap_api:app
