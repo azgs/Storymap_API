@@ -26,18 +26,19 @@ http://localhost:8000
 - The docker container can also be built and run from scratch locally:
 ```console
 user@host:~$ git clone https://github.com/azgs/Storymap_API.git
-Cloning into 'map_db_api'...
-remote: Enumerating objects: 129, done.
-remote: Counting objects: 100% (129/129), done.
-remote: Compressing objects: 100% (96/96), done.
-remote: Total 129 (delta 66), reused 88 (delta 28), pack-reused 0
-Receiving objects: 100% (129/129), 107.92 KiB | 741.00 KiB/s, done.
-Resolving deltas: 100% (66/66), done.
+Cloning into 'Storymap_API'...
+remote: Enumerating objects: 153, done.
+remote: Counting objects: 100% (153/153), done.
+remote: Compressing objects: 100% (116/116), done.
+remote: Total 153 (delta 80), reused 96 (delta 31), pack-reused 0
+Receiving objects: 100% (153/153), 113.85 KiB | 724.00 KiB/s, done.
+Resolving deltas: 100% (80/80), done.
 
-user@host:~$ cd cd Storymap_API/
+user@host:~$ cd Storymap_API/
+
 user@host:~/Storymap_API$ docker build --tag=storymap_api .
-user@host:~/map_db_api$ docker build --tag=storymap_api .
 ...build output...
+
 user@host:~/Storymap_API$ docker run -d --rm -p8000:5000 storymap_api
 ```
 
