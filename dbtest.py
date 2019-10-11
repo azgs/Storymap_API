@@ -35,7 +35,9 @@ def printone():
     # Query the database 
     name = '%%'
     # cursor.execute('SELECT * FROM api_tables.storymap_features WHERE feature_id=3 and TRUE')
-    cursor.execute('SELECT feature_id, map_id, feature_name, feature_picture, feature, CAST (x AS DOUBLE PRECISION), CAST (y AS DOUBLE PRECISION), wkid, geom FROM api_tables.storymap_features WHERE feature_id=3 and TRUE')
+    SQL = 'SELECT feature_id, map_id, feature_name, feature_picture, feature, CAST (x AS DOUBLE PRECISION), CAST (y AS DOUBLE PRECISION), wkid, geom FROM api_tables.storymap_features WHERE feature_id=%s and TRUE'
+    data = (3,)
+    cursor.execute(SQL, data)
     # cursor.execute('SELECT * FROM api_tables.storymap_features WHERE name ILIKE %s and TRUE',  (name, ))
     # cursor.execute("SELECT * FROM api_tables.storymap_metadata WHERE name ILIKE '%San Pedro%'")
     # cursor.execute("SELECT * FROM api_tables.storymap_metadata WHERE name ILIKE %s", name)
@@ -102,13 +104,16 @@ def geom_testing():
 #             As properties FROM api_tables.storymap_features As lg   ) As f )\
 #             As fc;") 
 
-    cursor.execute("SELECT feature_id, map_id, feature_name, \
-            feature_picture, feature, CAST (x AS DOUBLE PRECISION), \
-            CAST (y AS DOUBLE PRECISION), wkid, ST_AsGeoJSON(geom) \
-            FROM api_tables.storymap_features \
-            WHERE ST_Intersects (geom, ST_MakeEnvelope(-111, \
-            30, -109, 32, 4326));")
-
+#    cursor.execute("SELECT feature_id, map_id, feature_name, \
+#            feature_picture, feature, CAST (x AS DOUBLE PRECISION), \
+#            CAST (y AS DOUBLE PRECISION), wkid, ST_AsGeoJSON(geom) \
+#            FROM api_tables.storymap_features \
+#            WHERE ST_Intersects (geom, ST_MakeEnvelope(-111, \
+#            30, -109, 32, 4326));")
+    cursor.execute("select a from (select * from api_tables.storymap_features \
+            where st_intersects(st_makeenvelope(-180, -90, 180, 90, 4326), \
+            geom)) as b left join api_tables.storymap_metadata as a on \
+            a.map_id=b.map_id;") 
 #    cursor.execute("SELECT * from api_tables.storymap_features \
 #            WHERE ST_Intersects (geom, ST_MakeEnvelope(-111, \
 #            30, -109, 32, 4326));")
@@ -153,5 +158,5 @@ def geom_testing():
 
 
 #printall()
-# printone()
-geom_testing()
+printone()
+#geom_testing()
