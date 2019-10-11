@@ -4,7 +4,7 @@ This application provides an interface for programmatically accessing
 information from Storymap features and metadata tables.  
 
 ### Application Design
-HTTP GET requests are routed through Flask (a Python web framework), to query and return results from the PostgreSQL database. The database, logic layer, and front end are all encapsulated in the single container for convenience of use.
+HTTP GET requests are routed through Flask (a Python web framework), to query and return results from the PostgreSQL database. The database, logic layer, and front end are all encapsulated in a single docker container for convenience of use.
 
 ### Application usage
 - The application is intended to be used as a stateless utility service. Recommended usage is to start containers when needed. No information is to be saved in the container. In the event of a container or docker error condition, simply kill and restart the container. 
