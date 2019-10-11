@@ -26,20 +26,63 @@ app = flask.Flask(__name__)
 @app.route('/', methods=['GET'])
 def home():
     return '''<h1>StoryMap API</h1>
-    <p>Example routes: </p>
-    <p> </p>
-    <p>/api/v1/metadata?all</p>
-    <p>/api/v1/metadata?map_id=2</p>
-    <p>/api/v1/metadata?name=San%20Pedro</p>
-    <p>/api/v1/metadata?creator=Arizona</p>
-    <p>/api/v1/metadata?creator=Arizona&name=San%20Pedro</p>
-    <p>/api/v1/metadata?creator=Arizona&name=kaibab&map_id=3</p>
-    <p></p>
-    <p>/api/v1/features?all</p>
-    <p>/api/v1/features?all&response=long</p>
-    <p>/api/v1/features?map_id=2</p>
-    <p>/api/v1/features?feature_id=3</p>
-    <p>/api/v1/features?wkt=POLYGON((-191.0742188%2044.8402907,-191.25%2044.7155137,-186.5039063%20-3.337954,-144.4921875%20-1.0546279,-150.2929688%2033.1375512,-191.0742188%2044.8402907))&response=long</p>
+    <br>
+    <h2>Example routes: </h2>
+    <br>
+
+    <h3>Metadata queries</h3>
+
+    <a href="/api/v1/metadata?all">/api/v1/metadata?all</a>
+    <p>Query all metadata records</p>
+    <br>
+
+    <a href="/api/v1/metadata?map_id=2">/api/v1/metadata?map_id=2</a>
+    <p>Query metadata records where the map id is 2</p>
+    <br>
+
+    <a href="/api/v1/metadata?name=San%20Pedro">/api/v1/metadata?name=San%20Pedro</a>
+    <p>Query metadata records where the name contains "San Pedro". The name
+    parameter is case-insensitive</p>
+    <br>
+
+    <a href="/api/v1/metadata?creator=Arizona">/api/v1/metadata?creator=Arizona</a>
+    <p>Query metadata records where the creator contains "Arizona". The creator
+    parameter is case-insensitive</p>
+    <br>
+
+    <a href="/api/v1/metadata?creator=Arizona&name=San%20Pedro">/api/v1/metadata?creator=Arizona&name=San%20Pedro</a>
+    <p>Parameters can be combined </p>
+    <br>
+
+    <a href="/api/v1/metadata?creator=Arizona&name=kaibab&map_id=3">/api/v1/metadata?creator=Arizona&name=kaibab&map_id=3</a>
+    <p>Parameters can be combined</p>
+    <br>
+    <br>
+    <br>
+
+    <h3>Features queries</h3>
+
+    <a href="/api/v1/features?all">/api/v1/features?all</a>
+    <p>Query all features records</p>
+    <br>
+
+    <a href="/api/v1/features?all&response=long">/api/v1/features?all&response=long</a>
+    <p>The features route supports a "response" parameter. If "long" is passed,
+    the map metadata for each feature will be included in the response</p>
+    <br>
+
+    <a href="/api/v1/features?map_id=2">/api/v1/features?map_id=2</a>
+    <p>Query all features records where the map ID is 2</p>
+    <br>
+
+    <a href="/api/v1/features?feature_id=3">/api/v1/features?feature_id=3</a>
+    <p>Query all features records where the feature ID is 3</p>
+    <br>
+
+    <a href="/api/v1/features?wkt=POLYGON((-191.0742188%2044.8402907,-191.25%2044.7155137,-186.5039063%20-3.337954,-144.4921875%20-1.0546279,-150.2929688%2033.1375512,-191.0742188%2044.8402907))&response=long">/api/v1/features?wkt=POLYGON((-191.0742188%2044.8402907,-191.25%2044.7155137,-186.5039063%20-3.337954,-144.4921875%20-1.0546279,-150.2929688%2033.1375512,-191.0742188%2044.8402907))&response=long</a>
+    <p>Query features records by specifying a wkt bounding box. Here the "long"
+    response parameter is also utilized</p>
+    <br>
     '''
 
 
@@ -69,7 +112,6 @@ def metadata_lookup():
     # Request for filtered entries
     if not all_requested:
 
-        # TODO safety/sanitization
         # Build query string
         query = "SELECT * FROM api_tables.storymap_metadata WHERE"
 
@@ -83,10 +125,6 @@ def metadata_lookup():
             query += ' map_link=\'{}\' AND'.format(map_link)
 
         # close the statement with a NOOP
-        # TODO verify best practice for this
-        # this idea trims trailing 'AND'
-        # query = query[:-4] + ';'
-        # my idea - NOOP cap instead of string slicing
         query = query + ' TRUE ORDER BY map_id ASC;'
 
     # Print final query string to console
@@ -102,10 +140,6 @@ def metadata_lookup():
 
     # variable <results> should now reference a list of tuples; the tuples
     # containing all of the values from the columns for each record returned
-
-    # TODO might be able to build these labels into the returned results via the
-    # cursor calls. For now just manually build out the appropriate keys for the
-    # JSON template
 
     labelled_results = []
 
@@ -149,14 +183,15 @@ def features_lookup():
     max_y = query_parameters.get('max_y')
     wkt = query_parameters.get('wkt')
     response_type = query_parameters.get('response')
-    
-    # TODO currently assuming SRID will always be 4326
+    if response_type:
+        response_type = response_type.lower()
+
+    # Assumed SRID is 4326
     srid = query_parameters.get('srid', default=4326)
 
     # Request for all entries
     if all_requested:
 
-        # query = "SELECT * FROM api_tables.storymap_features ORDER BY feature_id ASC;"
         # Casting needed to convert the PostgreSQL numeric type of x and y, to
         # something JSON compatible, here a double precision floating literal
         query = "SELECT feature_id, map_id, feature_name, feature_picture, feature, CAST (x AS DOUBLE PRECISION), CAST (y AS DOUBLE PRECISION), wkid, geom FROM api_tables.storymap_features ORDER BY feature_id ASC;"
@@ -164,10 +199,7 @@ def features_lookup():
     # Request for filtered entries
     if not all_requested:
 
-        # TODO safety/sanitization
         # Build query string
-        #query = "SELECT * FROM api_tables.storymap_features WHERE"
-        #query = "SELECT feature_id, map_id, feature_name, feature_picture, feature, CAST (x AS DOUBLE PRECISION), CAST (y AS DOUBLE PRECISION), wkid, geom FROM api_tables.storymap_features WHERE"
         query = "SELECT feature_id, map_id, feature_name, feature_picture, feature,  ST_AsGeoJSON(geom)::jsonb FROM api_tables.storymap_features WHERE"
 
         if feature_id:
@@ -181,10 +213,6 @@ def features_lookup():
             query += ' ST_Intersects (geom, ST_GeomFromText(\'{}\', {})) AND'.format(wkt, srid)
 
         # close the statement with a NOOP
-        # TODO verify best practice for this
-        # this idea trims trailing 'AND'
-        # query = query[:-4] + ';'
-        # my idea - NOOP cap instead of string slicing
         if response_type == 'long':
             query += ' TRUE'
             query = 'select * from ({}) as b left join \
@@ -200,16 +228,10 @@ def features_lookup():
 
     # Retrieve all results
     cursor.execute(query)
-    # results = cursor.fetchall()
-    # features = { "type": "FeatureCollection", "features": [{"type": "feature", "geometry": f[3], "properties": {"id": int(f[0]), "area": float(f[1]), "perimeter": float(f[2])}} for f in cursor.fetchall()]} 
 
     # Special case for long response
     if response_type == 'long':
-        features = { "type": "FeatureCollection", "features": [{"type":
-            "Feature", "geometry": f[5], "properties": {"feature_id": f[0],
-                "map_id": f[1], "map_name": f[7], "map_description": f[8],
-                "map_creator": f[9], "map_enterer": f[10], "map_link": f[11], "map_app_id":
-                f[12], "map_web_id": f[13], "feature_name": f[2], "feature_picture": f[3], "feature": f[4]}} for f in cursor.fetchall()]} 
+        features = { "type": "FeatureCollection", "features": [{"type": "Feature", "geometry": f[5], "properties": {"feature_id": f[0], "map_id": f[1], "map_name": f[7], "map_description": f[8], "map_creator": f[9], "map_enterer": f[10], "map_link": f[11], "map_app_id": f[12], "map_web_id": f[13], "feature_name": f[2], "feature_picture": f[3], "feature": f[4]}} for f in cursor.fetchall()]} 
 
     else:
         features = { "type": "FeatureCollection", "features": [{"type": "Feature", "geometry": f[5], "properties": {"feature_id": f[0], "map_id": f[1], "feature_name": f[2], "feature_picture": f[3], "feature": f[4]}} for f in cursor.fetchall()]} 
@@ -218,33 +240,7 @@ def features_lookup():
     cursor.close()
     connection.close()
 
-    # variable <results> should now reference a list of tuples; the tuples
-    # containing all of the values from the columns for each record returned
-
-    # TODO might be able to build these labels into the returned results via the
-    # cursor calls. For now just manually build out the appropriate keys for the
-    # JSON template
-
-#    labelled_results = []
-#
-#    for record in results:
-#
-#        keyed_record = collections.OrderedDict()
-#
-#        keyed_record['feature_id'] = record[0]
-#        keyed_record['map_id'] = record[1]
-#        keyed_record['feature_name'] = record[2]
-#        keyed_record['feature_picture'] = record[3]
-#        keyed_record['feature'] = record[4]
-#        keyed_record['x'] = record[5]
-#        keyed_record['y'] = record[6]
-#        keyed_record['wkid'] = record[7]
-#        keyed_record['geom'] = record[8]
-#
-#        labelled_results.append(keyed_record)
-
     # Return results
-    # return(jsonify({'success': labelled_results}))
     return(features)
 
 
@@ -254,10 +250,10 @@ def features_lookup():
 app.config['JSON_SORT_KEYS'] = False
 
 # TODO - has to be FALSE on deploy
-app.config['DEBUG'] = True      # for testing ONLY
-# app.config['DEBUG'] = False
+#app.config['DEBUG'] = True      # for testing ONLY
+app.config['DEBUG'] = False
 
 # TODO - has to be app.run() on deploy
 # Start the application
-# app.run()                       # listen on localhost only
-app.run(host='0.0.0.0')       # listen on the local IP - for testing ONLY
+app.run()                       # listen on localhost only
+# app.run(host='0.0.0.0')       # listen on the local IP - for testing ONLY
