@@ -10,7 +10,7 @@ HTTP GET requests are routed through Flask (a Python web framework), to query an
 - The application is intended to be used as a stateless utility service. Recommended usage is to start containers when needed. No information is to be saved in the container. In the event of a container or docker error condition, simply kill and restart the container. 
 
 ### Need to utilize a new database version?
-- If you would like to use a new or modified database for the application, just replace the file data/storymap.sql in the project source with your new full PosgreSQL dump (see the storymap.sql file for an example). The build process specified in the Dockerfile will perform the SQL restore (progress output will be displayed on cosole), and the new database will be available on next run of the container.
+- If you would like to use a new or modified database for the application, just replace the file data/storymap.sql in the project source with your new full PosgreSQL dump (see the storymap.sql file for an example) and re-build the container. The build process specified in the Dockerfile will perform the SQL restore (progress output will be displayed on cosole), and the new database will be available on next run of the container.
   
   
 ### Run the application
