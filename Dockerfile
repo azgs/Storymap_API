@@ -32,7 +32,7 @@ FROM packages-installed AS python-environment
 # cache can better be utilized, and the pip installs don't have to run every
 # time any one source file has been modified
 COPY ./requirements.txt /map_api/requirements.txt
-RUN pip3 install -r requirements.txt
+RUN pip3 install -r /map_api/requirements.txt
 
 COPY . /map_api
 
