@@ -21,6 +21,8 @@ app = flask.Flask(__name__)
 
 
 # Root page
+@app.route('/api', strict_slashes=False, methods=['GET'])
+@app.route('/api/v1', strict_slashes=False, methods=['GET'])
 @app.route('/', methods=['GET'])
 def home():
     return '''<h1>StoryMap API</h1>
@@ -34,8 +36,10 @@ def home():
     <p>/api/v1/metadata?creator=Arizona&name=kaibab&map_id=3</p>
     <p></p>
     <p>/api/v1/features?all</p>
+    <p>/api/v1/features?all&response=long</p>
     <p>/api/v1/features?map_id=2</p>
     <p>/api/v1/features?feature_id=3</p>
+    <p>/api/v1/features?wkt=POLYGON((-191.0742188%2044.8402907,-191.25%2044.7155137,-186.5039063%20-3.337954,-144.4921875%20-1.0546279,-150.2929688%2033.1375512,-191.0742188%2044.8402907))&response=long</p>
     '''
 
 
@@ -144,6 +148,8 @@ def features_lookup():
     min_y = query_parameters.get('min_y')
     max_y = query_parameters.get('max_y')
     wkt = query_parameters.get('wkt')
+    response_type = query_parameters.get('response')
+    
     # TODO currently assuming SRID will always be 4326
     srid = query_parameters.get('srid', default=4326)
 
@@ -179,7 +185,15 @@ def features_lookup():
         # this idea trims trailing 'AND'
         # query = query[:-4] + ';'
         # my idea - NOOP cap instead of string slicing
-        query = query + ' TRUE ORDER BY feature_id ASC;'
+        if response_type == 'long':
+            query += ' TRUE'
+            query = 'select * from ({}) as b left join \
+                    api_tables.storymap_metadata as a on a.map_id=b.map_id \
+                    ORDER by feature_id ASC;'.format(query)
+
+        # short response, default
+        else:
+            query = query + ' TRUE ORDER BY feature_id ASC;'
 
     # Print final query string to console
     print('\n' + query + '\n')
@@ -188,7 +202,18 @@ def features_lookup():
     cursor.execute(query)
     # results = cursor.fetchall()
     # features = { "type": "FeatureCollection", "features": [{"type": "feature", "geometry": f[3], "properties": {"id": int(f[0]), "area": float(f[1]), "perimeter": float(f[2])}} for f in cursor.fetchall()]} 
-    features = { "type": "FeatureCollection", "features": [{"type": "Feature", "geometry": f[5], "properties": {"feature_id": f[0], "map_id": f[1], "feature_name": f[2], "feature_picture": f[3], "feature": f[4]}} for f in cursor.fetchall()]} 
+
+    # Special case for long response
+    if response_type == 'long':
+        features = { "type": "FeatureCollection", "features": [{"type":
+            "Feature", "geometry": f[5], "properties": {"feature_id": f[0],
+                "map_id": f[1], "map_name": f[7], "map_description": f[8],
+                "map_creator": f[9], "map_enterer": f[10], "map_link": f[11], "map_app_id":
+                f[12], "map_web_id": f[13], "feature_name": f[2], "feature_picture": f[3], "feature": f[4]}} for f in cursor.fetchall()]} 
+
+    else:
+        features = { "type": "FeatureCollection", "features": [{"type": "Feature", "geometry": f[5], "properties": {"feature_id": f[0], "map_id": f[1], "feature_name": f[2], "feature_picture": f[3], "feature": f[4]}} for f in cursor.fetchall()]} 
+
     # Close DB connection
     cursor.close()
     connection.close()
