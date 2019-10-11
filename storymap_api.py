@@ -80,7 +80,7 @@ def home():
     <br>
 
     <a href="/api/v1/features?wkt=POLYGON((-191.0742188%2044.8402907,-191.25%2044.7155137,-186.5039063%20-3.337954,-144.4921875%20-1.0546279,-150.2929688%2033.1375512,-191.0742188%2044.8402907))&response=long">/api/v1/features?wkt=POLYGON((-191.0742188%2044.8402907,-191.25%2044.7155137,-186.5039063%20-3.337954,-144.4921875%20-1.0546279,-150.2929688%2033.1375512,-191.0742188%2044.8402907))&response=long</a>
-    <p>Query features records by specifying a wkt bounding box. Here the "long"
+    <p>Query features records by specifying a wkt geometry. Here the "long"
     response parameter is also utilized</p>
     <br>
     '''
