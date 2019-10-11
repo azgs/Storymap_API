@@ -19,7 +19,8 @@ HTTP GET requests are routed through Flask (a Python web framework), to query an
 ```console
 user@host:~$ docker run -d --rm -p8000:5000 snolan1/storymap_api:release1.0
 ```  
-This will pull the container from docker hub, and start it (-d) detached (in the background). The container will be ephemeral (--rm) and will be deleted when stopped. TCP port 5000 inside of the container will be exposed as **8000 locally, where the application will be available.**
+This will pull the container from docker hub, and start it (-d) detached (in the background). The container will be ephemeral (--rm) and will be deleted when stopped. TCP port 5000 inside of the container will be exposed as **8000 locally, where the application will be available.**  
+(Please note that the container needs to initialize the database and web server processes before serving API requests; it may take a few seconds after starting the container before the service is available)
 
 http://localhost:8000
 
